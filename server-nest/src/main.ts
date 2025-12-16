@@ -1,0 +1,20 @@
+import 'reflect-metadata'
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+  
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('PORT') || 3003;
+  await app.listen(port);
+  console.log(`Nest server listening on http://localhost:${port}`);
+}
+bootstrap();

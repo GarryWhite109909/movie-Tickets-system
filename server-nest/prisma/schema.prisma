@@ -1,0 +1,243 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Film {
+  filmId       BigInt        @id @default(autoincrement()) @map("filmId")
+  filmName     String        @map("filmName") @db.VarChar(255)
+  englishName  String?       @db.VarChar(255)
+  introduction String?       @db.VarChar(255)
+  createdAt    DateTime      @db.DateTime(0)
+  updatedAt    DateTime      @db.DateTime(0)
+  deletedAt    DateTime?     @db.DateTime(0)
+  directors    String?       @db.VarChar(255)
+  performers   String?       @db.VarChar(255)
+  onTime       DateTime?     @db.DateTime(0)
+  filmTime     String?       @db.VarChar(255)
+  arrange      arrange[]
+  booking      booking[]
+  filmtoarea   filmtoarea[]
+  filmtoclass  filmtoclass[]
+  hotfilm      hotfilm[]
+  posterimg    posterimg[]
+
+  @@map("film")
+}
+
+model arrange {
+  arrangeId BigInt    @id @default(autoincrement())
+  filmId    BigInt?
+  roomId    Int?
+  date      DateTime? @db.Date
+  start     DateTime? @db.Time(0)
+  end       DateTime? @db.Time(0)
+  price     Decimal?  @db.Decimal(10, 2)
+  createdAt DateTime? @db.DateTime(0)
+  updatedAt DateTime? @db.DateTime(0)
+  deletedAt DateTime? @db.DateTime(0)
+  film      Film?     @relation(fields: [filmId], references: [filmId], onDelete: NoAction, onUpdate: NoAction, map: "arrange_ibfk_1")
+  filmroom  filmroom? @relation(fields: [roomId], references: [roomId], onDelete: NoAction, onUpdate: NoAction, map: "arrange_ibfk_2")
+  booking   booking[]
+
+  @@index([filmId], map: "filmId")
+  @@index([roomId], map: "roomId")
+}
+
+model booking {
+  id         BigInt    @id @default(autoincrement())
+  arrangeId  BigInt?
+  userId     Int?
+  seatId     Int?
+  filmId     BigInt?
+  roomId     Int?
+  ticketCode String?   @db.VarChar(255)
+  status     String?   @db.VarChar(255)
+  createdAt  DateTime? @db.DateTime(0)
+  updatedAt  DateTime? @db.DateTime(0)
+  deletedAt  DateTime? @db.DateTime(0)
+  user       user?     @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "booking_ibfk_1")
+  seatinfo   seatinfo? @relation(fields: [seatId], references: [seatId], onDelete: NoAction, onUpdate: NoAction, map: "booking_ibfk_2")
+  film       Film?     @relation(fields: [filmId], references: [filmId], onDelete: NoAction, onUpdate: NoAction, map: "booking_ibfk_3")
+  filmroom   filmroom? @relation(fields: [roomId], references: [roomId], onDelete: NoAction, onUpdate: NoAction, map: "booking_ibfk_4")
+  arrange    arrange?  @relation(fields: [arrangeId], references: [arrangeId], onDelete: NoAction, onUpdate: NoAction, map: "booking_ibfk_5")
+
+  @@index([arrangeId], map: "arrangeId")
+  @@index([filmId], map: "filmId")
+  @@index([roomId], map: "roomId")
+  @@index([seatId], map: "seatId")
+  @@index([userId], map: "userId")
+}
+
+model filmarea {
+  areaId     Int          @id @default(autoincrement())
+  areaName   String       @db.VarChar(255)
+  createdAt  DateTime     @db.DateTime(0)
+  updatedAt  DateTime     @db.DateTime(0)
+  deletedAt  DateTime?    @db.DateTime(0)
+  filmtoarea filmtoarea[]
+}
+
+model filmclass {
+  classId     Int           @id @default(autoincrement())
+  className   String        @db.VarChar(255)
+  createdAt   DateTime      @db.DateTime(0)
+  updatedAt   DateTime      @db.DateTime(0)
+  deletedAt   DateTime?     @db.DateTime(0)
+  filmtoclass filmtoclass[]
+}
+
+model filmroom {
+  roomId    Int        @id @default(autoincrement())
+  roomName  String?    @db.VarChar(64)
+  number    Int?
+  row       Int?
+  column    Int?
+  createdAt DateTime?  @db.DateTime(0)
+  updatedAt DateTime?  @db.DateTime(0)
+  deletedAt DateTime?  @db.DateTime(0)
+  arrange   arrange[]
+  booking   booking[]
+  seatinfo  seatinfo[]
+}
+
+model filmtoarea {
+  createdAt DateTime @db.DateTime(0)
+  updatedAt DateTime @db.DateTime(0)
+  filmId    BigInt
+  areaId    Int
+  film      Film     @relation(fields: [filmId], references: [filmId], onDelete: Cascade, map: "filmtoarea_ibfk1")
+  filmarea  filmarea @relation(fields: [areaId], references: [areaId], onDelete: Cascade, map: "filmtoarea_ibfk2")
+
+  @@id([filmId, areaId])
+  @@index([areaId], map: "filmtoarea_ibfk2")
+}
+
+model filmtoclass {
+  createdAt DateTime  @db.DateTime(0)
+  updatedAt DateTime  @db.DateTime(0)
+  filmId    BigInt
+  classId   Int
+  film      Film      @relation(fields: [filmId], references: [filmId], onDelete: Cascade, map: "filmtoclass_ibfk_1")
+  filmclass filmclass @relation(fields: [classId], references: [classId], onDelete: Cascade, map: "filmtoclass_ibfk_2")
+
+  @@id([filmId, classId])
+  @@index([classId], map: "classId")
+}
+
+model hotfilm {
+  id        BigInt    @id @default(autoincrement())
+  filmId    BigInt?
+  createdAt DateTime? @db.DateTime(0)
+  updatedAt DateTime? @db.DateTime(0)
+  deletedAt DateTime? @db.DateTime(0)
+  film      Film?     @relation(fields: [filmId], references: [filmId], onDelete: NoAction, onUpdate: NoAction, map: "hotfilm_ibfk_1")
+
+  @@index([filmId], map: "filmId")
+}
+
+model indexcarousel {
+  id        BigInt    @id @default(autoincrement())
+  href      String?   @db.VarChar(255)
+  title     String?   @db.VarChar(255)
+  imgUrl    String?   @db.VarChar(255)
+  createdAt DateTime? @db.DateTime(0)
+  updatedAt DateTime? @db.DateTime(0)
+  deletedAt DateTime? @db.DateTime(0)
+}
+
+model modle {
+  modleId    Int          @id @default(autoincrement())
+  modleName  String?      @db.VarChar(255)
+  createdAt  DateTime?    @db.DateTime(0)
+  updatedAt  DateTime?    @db.DateTime(0)
+  deletedAt  DateTime?    @db.DateTime(0)
+  permission permission[]
+}
+
+model permission {
+  id        Int       @id @default(autoincrement())
+  roleId    Int?
+  modleId   Int?
+  create    Int?      @default(0)
+  delete    Int?      @default(0)
+  update    Int?      @default(0)
+  read      Int?      @default(0)
+  createdAt DateTime? @db.DateTime(0)
+  updatedAt DateTime? @db.DateTime(0)
+  deletedAt DateTime? @db.DateTime(0)
+  role      role?     @relation(fields: [roleId], references: [roleId], onDelete: NoAction, onUpdate: NoAction, map: "permission_ibfk_1")
+  modle     modle?    @relation(fields: [modleId], references: [modleId], onDelete: NoAction, onUpdate: NoAction, map: "permission_ibfk_2")
+
+  @@index([modleId], map: "modleId")
+  @@index([roleId], map: "roleId")
+}
+
+model posterimg {
+  posterId  BigInt   @id @default(autoincrement())
+  url       String   @db.VarChar(256)
+  createdAt DateTime @db.DateTime(0)
+  updatedAt DateTime @db.DateTime(0)
+  filmId    BigInt
+  film      Film     @relation(fields: [filmId], references: [filmId], onDelete: Cascade, map: "filmtoposter_ibfk")
+
+  @@index([filmId], map: "filmtoposter_ibfk")
+}
+
+model role {
+  roleId     Int          @id @default(autoincrement())
+  roleName   String?      @db.VarChar(256)
+  createdAt  DateTime?    @db.DateTime(0)
+  updatedAt  DateTime?    @db.DateTime(0)
+  deletedAt  DateTime?    @db.DateTime(0)
+  permission permission[]
+  usertorole usertorole[]
+}
+
+model seatinfo {
+  seatId    Int       @id @default(autoincrement())
+  roomId    Int?
+  seatCode  String?   @db.VarChar(64)
+  row       Int?
+  column    Int?
+  createdAt DateTime? @db.DateTime(0)
+  updatedAt DateTime? @db.DateTime(0)
+  deletedAt DateTime? @db.DateTime(0)
+  booking   booking[]
+  filmroom  filmroom? @relation(fields: [roomId], references: [roomId], onDelete: NoAction, onUpdate: NoAction, map: "seatinfo_ibfk_1")
+
+  @@index([roomId], map: "seatinfo_ibfk_1")
+}
+
+model user {
+  userId     Int          @id @default(autoincrement())
+  userName   String       @db.VarChar(255)
+  password   String       @db.VarChar(255)
+  name       String?      @db.VarChar(255)
+  phone      String?      @db.VarChar(255)
+  email      String?      @db.VarChar(255)
+  avatar     String?      @db.VarChar(255)
+  createdAt  DateTime     @db.DateTime(0)
+  updatedAt  DateTime     @db.DateTime(0)
+  deletedAt  DateTime?    @db.DateTime(0)
+  booking    booking[]
+  usertorole usertorole[]
+}
+
+model usertorole {
+  id        Int       @id @default(autoincrement())
+  userId    Int?
+  roleId    Int?
+  createdAt DateTime? @db.DateTime(0)
+  updatedAt DateTime? @db.DateTime(0)
+  deletedAt DateTime? @db.DateTime(0)
+  user      user?     @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "usertorole_ibfk_1")
+  role      role?     @relation(fields: [roleId], references: [roleId], onDelete: NoAction, onUpdate: NoAction, map: "usertorole_ibfk_2")
+
+  @@index([roleId], map: "roleId")
+  @@index([userId], map: "userId")
+}
