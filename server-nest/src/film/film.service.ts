@@ -48,4 +48,75 @@ export class FilmService {
       poster: posterRows.length > 0 ? posterRows[0].url : null
     };
   }
+
+  async create(data: any) {
+    const { poster, ...rest } = data;
+    const film = await this.db.film.create({
+      data: {
+        filmName: rest.filmName,
+        englishName: rest.englishName,
+        introduction: rest.introduction,
+        directors: rest.directors,
+        performers: rest.performers,
+        filmTime: rest.filmTime,
+        onTime: rest.onTime ? new Date(rest.onTime) : undefined,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        posterimg: poster ? {
+          create: {
+            url: poster,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }
+        } : undefined
+      }
+    });
+    return { ...film, filmId: film.filmId.toString() };
+  }
+
+  async update(id: number, data: any) {
+    const { poster, ...rest } = data;
+    const film = await this.db.film.update({
+      where: { filmId: BigInt(id) },
+      data: {
+        filmName: rest.filmName,
+        englishName: rest.englishName,
+        introduction: rest.introduction,
+        directors: rest.directors,
+        performers: rest.performers,
+        filmTime: rest.filmTime,
+        onTime: rest.onTime ? new Date(rest.onTime) : undefined,
+        updatedAt: new Date(),
+      }
+    });
+    
+    if (poster) {
+       const existingPoster = await this.db.posterimg.findFirst({ where: { filmId: BigInt(id) }});
+       if (existingPoster) {
+         await this.db.posterimg.update({
+            where: { posterId: existingPoster.posterId },
+            data: { url: poster, updatedAt: new Date() }
+         });
+       } else {
+         await this.db.posterimg.create({
+            data: {
+               filmId: BigInt(id),
+               url: poster,
+               createdAt: new Date(),
+               updatedAt: new Date()
+            }
+         });
+       }
+    }
+
+    return { ...film, filmId: film.filmId.toString() };
+  }
+
+  async delete(id: number) {
+    const film = await this.db.film.update({
+      where: { filmId: BigInt(id) },
+      data: { deletedAt: new Date() }
+    });
+    return { ...film, filmId: film.filmId.toString() };
+  }
 }

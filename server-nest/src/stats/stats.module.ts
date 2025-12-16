@@ -5,6 +5,6 @@ import { DbService } from '../utils/db.service'
 
 @Module({
   controllers: [StatsController],
-  providers: [StatsService, DbService],
+  providers: [StatsService],
 })
 export class StatsModule {}

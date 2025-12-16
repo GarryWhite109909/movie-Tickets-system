@@ -5,6 +5,6 @@ import { DbService } from '../utils/db.service';
 
 @Module({
   controllers: [FilmController],
-  providers: [FilmService, DbService],
+  providers: [FilmService],
 })
 export class FilmModule {}

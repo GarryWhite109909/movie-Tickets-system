@@ -1,19 +1,27 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common'
 import { PrismaClient } from '@prisma/client'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
-export class DbService {
-  private prisma: PrismaClient
-  constructor() {
-    this.prisma = new PrismaClient({
+export class DbService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  constructor(private configService: ConfigService) {
+    super({
       datasources: {
-        db: { url: 'mysql://root:109909@localhost:3306/filmsdata' }
+        db: { url: configService.get<string>('DATABASE_URL') }
       }
     })
   }
+
+  async onModuleInit() {
+    await this.$connect()
+  }
+
+  async onModuleDestroy() {
+    await this.$disconnect()
+  }
+
   async query<T = any>(sql: string, params: any[] = []): Promise<T[]> {
-    // Prisma 4: use unsafe for positional params
-    const rows = (await (this.prisma.$queryRawUnsafe as any)(sql, ...params)) as T[]
+    const rows = (await this.$queryRawUnsafe(sql, ...params)) as T[]
     return rows
   }
 }
