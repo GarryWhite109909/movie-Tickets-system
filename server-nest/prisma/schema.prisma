@@ -26,6 +26,7 @@ model Film {
   hotfilm      hotfilm[]
   posterimg    posterimg[]
 
+  @@index([deletedAt, createdAt], map: "idx_film_deleted_created")
   @@map("film")
 }
 
@@ -44,6 +45,7 @@ model arrange {
   filmroom  filmroom? @relation(fields: [roomId], references: [roomId], onDelete: NoAction, onUpdate: NoAction, map: "arrange_ibfk_2")
   booking   booking[]
 
+  @@index([filmId, deletedAt, date, start], map: "idx_arrange_film_deleted_date_start")
   @@index([filmId], map: "filmId")
   @@index([roomId], map: "roomId")
 }
@@ -59,6 +61,7 @@ model booking {
   col        Int?
   ticketCode String?   @db.VarChar(255)
   status     String?   @db.VarChar(255)
+  price      Decimal?  @db.Decimal(10, 2)
   createdAt  DateTime? @db.DateTime(0)
   updatedAt  DateTime? @db.DateTime(0)
   deletedAt  DateTime? @db.DateTime(0)
@@ -68,6 +71,9 @@ model booking {
   filmroom   filmroom? @relation(fields: [roomId], references: [roomId], onDelete: NoAction, onUpdate: NoAction, map: "booking_ibfk_4")
   arrange    arrange?  @relation(fields: [arrangeId], references: [arrangeId], onDelete: NoAction, onUpdate: NoAction, map: "booking_ibfk_5")
 
+  @@index([arrangeId, deletedAt, row, col], map: "idx_booking_arrange_deleted_row_col")
+  @@index([deletedAt, createdAt, filmId], map: "idx_booking_deleted_created_film")
+  @@index([userId, deletedAt, createdAt], map: "idx_booking_user_deleted_created")
   @@index([arrangeId], map: "arrangeId")
   @@index([filmId], map: "filmId")
   @@index([roomId], map: "roomId")
@@ -228,6 +234,7 @@ model user {
   deletedAt  DateTime?    @db.DateTime(0)
   booking    booking[]
   usertorole usertorole[]
+  sys_user_role sys_user_role[]
 }
 
 model usertorole {
@@ -277,6 +284,7 @@ model sys_role {
   createdAt           DateTime?             @default(now()) @db.DateTime(0)
   updatedAt           DateTime?             @default(now()) @db.DateTime(0)
   sys_role_permission sys_role_permission[]
+  sys_user_role sys_user_role[]
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -288,4 +296,14 @@ model sys_role_permission {
 
   @@id([roleId, permissionId])
   @@index([permissionId], map: "fk_rp_perm")
+}
+
+model sys_user_role {
+  userId Int
+  roleId BigInt
+  user   user     @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: NoAction)
+  sys_role sys_role @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([userId, roleId])
+  @@index([roleId], map: "fk_ur_role")
 }

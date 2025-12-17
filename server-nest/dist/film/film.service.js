@@ -27,7 +27,19 @@ let FilmService = class FilmService {
         f.performers,
         f.onTime,
         f.filmTime,
-        (SELECT url FROM posterimg WHERE filmId = f.filmId LIMIT 1) as poster
+        (SELECT url FROM posterimg WHERE filmId = f.filmId LIMIT 1) as poster,
+        (
+          SELECT GROUP_CONCAT(DISTINCT fc.className SEPARATOR ',')
+          FROM filmtoclass ftc
+          JOIN filmclass fc ON fc.classId = ftc.classId
+          WHERE ftc.filmId = f.filmId
+        ) as genres,
+        (
+          SELECT GROUP_CONCAT(DISTINCT fa.areaName SEPARATOR ',')
+          FROM filmtoarea fta
+          JOIN filmarea fa ON fa.areaId = fta.areaId
+          WHERE fta.filmId = f.filmId
+        ) as areas
       FROM film f
       WHERE f.deletedAt IS NULL
       ORDER BY f.createdAt DESC
@@ -35,20 +47,40 @@ let FilmService = class FilmService {
         const films = await this.db.query(sql);
         return films.map(film => ({
             ...film,
-            poster: film.poster || '/default-poster.jpg'
+            poster: film.poster || '/default-poster.jpg',
+            genres: typeof film.genres === 'string' && film.genres.length > 0 ? film.genres.split(',') : [],
+            areas: typeof film.areas === 'string' && film.areas.length > 0 ? film.areas.split(',') : [],
         }));
     }
     async getFilmById(id) {
-        const sql = `SELECT * FROM film WHERE filmId = ?`;
+        const sql = `
+      SELECT
+        f.*, 
+        (SELECT url FROM posterimg WHERE filmId = f.filmId LIMIT 1) as poster,
+        (
+          SELECT GROUP_CONCAT(DISTINCT fc.className SEPARATOR ',')
+          FROM filmtoclass ftc
+          JOIN filmclass fc ON fc.classId = ftc.classId
+          WHERE ftc.filmId = f.filmId
+        ) as genres,
+        (
+          SELECT GROUP_CONCAT(DISTINCT fa.areaName SEPARATOR ',')
+          FROM filmtoarea fta
+          JOIN filmarea fa ON fa.areaId = fta.areaId
+          WHERE fta.filmId = f.filmId
+        ) as areas
+      FROM film f
+      WHERE f.filmId = ?
+    `;
         const rows = await this.db.query(sql, [id]);
         if (rows.length === 0)
             return null;
         const film = rows[0];
-        const posterSql = `SELECT url FROM posterimg WHERE filmId = ? LIMIT 1`;
-        const posterRows = await this.db.query(posterSql, [id]);
         return {
             ...film,
-            poster: posterRows.length > 0 ? posterRows[0].url : null
+            poster: film.poster || null,
+            genres: typeof film.genres === 'string' && film.genres.length > 0 ? film.genres.split(',') : [],
+            areas: typeof film.areas === 'string' && film.areas.length > 0 ? film.areas.split(',') : [],
         };
     }
     async create(data) {
