@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Table, Button, Space, Modal, message, Popconfirm } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import request from '../../utils/request';
 import FilmEdit from './FilmEdit';
 import type { Film } from './FilmEdit';
+import { Descriptions, Image } from 'antd';
 
 const FilmList: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [currentFilm, setCurrentFilm] = useState<Film | null>(null);
   const queryClient = useQueryClient();
 
@@ -42,12 +44,22 @@ const FilmList: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const handleView = (record: Film) => {
+    setCurrentFilm(record);
+    setIsDetailOpen(true);
+  };
+
   const handleDelete = (id: number) => {
     deleteMutation.mutate(id);
   };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
+    setCurrentFilm(null);
+  };
+
+  const handleDetailClose = () => {
+    setIsDetailOpen(false);
     setCurrentFilm(null);
   };
 
@@ -84,6 +96,7 @@ const FilmList: React.FC = () => {
       key: 'action',
       render: (_: any, record: Film) => (
         <Space size="middle">
+          <Button icon={<EyeOutlined />} onClick={() => handleView(record)}>详情</Button>
           <Button icon={<EditOutlined />} onClick={() => handleEdit(record)}>编辑</Button>
           <Popconfirm
             title="确定要删除吗?"
@@ -123,6 +136,33 @@ const FilmList: React.FC = () => {
           onSuccess={handleSuccess}
           onCancel={handleModalClose}
         />
+      </Modal>
+      
+      <Modal
+        title="电影详情"
+        open={isDetailOpen}
+        onCancel={handleDetailClose}
+        footer={[
+          <Button key="close" onClick={handleDetailClose}>
+            关闭
+          </Button>
+        ]}
+        width={800}
+      >
+        {currentFilm && (
+          <Descriptions bordered column={1}>
+            <Descriptions.Item label="电影名称">{currentFilm.filmName}</Descriptions.Item>
+            <Descriptions.Item label="英文名称">{currentFilm.englishName || '-'}</Descriptions.Item>
+            <Descriptions.Item label="海报">
+              {currentFilm.poster ? <Image width={100} src={currentFilm.poster} /> : '暂无海报'}
+            </Descriptions.Item>
+            <Descriptions.Item label="导演">{currentFilm.directors}</Descriptions.Item>
+            <Descriptions.Item label="演员">{currentFilm.performers}</Descriptions.Item>
+            <Descriptions.Item label="时长">{currentFilm.filmTime}</Descriptions.Item>
+            <Descriptions.Item label="上映时间">{currentFilm.onTime}</Descriptions.Item>
+            <Descriptions.Item label="简介">{currentFilm.introduction}</Descriptions.Item>
+          </Descriptions>
+        )}
       </Modal>
     </div>
   );

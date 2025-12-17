@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Table, Button, Space, Modal, message, Popconfirm } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, AppstoreOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import request from '../../utils/request';
 import CinemaEdit from './CinemaEdit';
@@ -8,6 +8,7 @@ import type { Room } from './CinemaEdit';
 
 const CinemaList: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLayoutOpen, setIsLayoutOpen] = useState(false);
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
   const queryClient = useQueryClient();
 
@@ -42,6 +43,11 @@ const CinemaList: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const handleLayout = (record: Room) => {
+    setCurrentRoom(record);
+    setIsLayoutOpen(true);
+  };
+
   const handleDelete = (id: number) => {
     deleteMutation.mutate(id);
   };
@@ -51,10 +57,69 @@ const CinemaList: React.FC = () => {
     setCurrentRoom(null);
   };
 
+  const handleLayoutClose = () => {
+    setIsLayoutOpen(false);
+    setCurrentRoom(null);
+  };
+
   const handleSuccess = () => {
     setIsModalOpen(false);
     setCurrentRoom(null);
     queryClient.invalidateQueries({ queryKey: ['rooms'] });
+  };
+
+  const renderSeatLayout = () => {
+    if (!currentRoom) return null;
+    const { row, column } = currentRoom;
+    // Assuming simple full grid for now as per requirement to show "layout".
+    // "Occupancy" is not available per hall (it's per screening), so we show "Available" (Green) as capacity.
+    
+    const rows = [];
+    for (let i = 1; i <= row; i++) {
+      const seats = [];
+      for (let j = 1; j <= column; j++) {
+        seats.push(
+          <div
+            key={`${i}-${j}`}
+            style={{
+              width: 30,
+              height: 30,
+              background: '#52c41a', // Green for available/seat exists
+              margin: 4,
+              borderRadius: 4,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontSize: 10,
+              cursor: 'pointer'
+            }}
+            title={`${i}排${j}座`}
+          >
+            {j}
+          </div>
+        );
+      }
+      rows.push(
+        <div key={i} style={{ display: 'flex', marginBottom: 4 }}>
+          <div style={{ width: 30, marginRight: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{i}排</div>
+          {seats}
+        </div>
+      );
+    }
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'auto', maxHeight: 500 }}>
+        <div style={{ marginBottom: 16, width: '80%', height: 20, background: '#e8e8e8', textAlign: 'center', lineHeight: '20px', borderRadius: '0 0 20px 20px' }}>
+          银幕
+        </div>
+        {rows}
+        <div style={{ marginTop: 16, display: 'flex', gap: 16 }}>
+           <div style={{ display: 'flex', alignItems: 'center' }}><div style={{ width: 20, height: 20, background: '#52c41a', marginRight: 4, borderRadius: 4 }} /> 正常座位</div>
+           {/* Placeholder for broken/sold if we had that data */}
+        </div>
+      </div>
+    );
   };
 
   const columns = [
@@ -89,6 +154,7 @@ const CinemaList: React.FC = () => {
       key: 'action',
       render: (_: any, record: Room) => (
         <Space size="middle">
+          <Button icon={<AppstoreOutlined />} onClick={() => handleLayout(record)}>座位</Button>
           <Button icon={<EditOutlined />} onClick={() => handleEdit(record)}>编辑</Button>
           <Popconfirm
             title="确定要删除吗?"
@@ -128,6 +194,19 @@ const CinemaList: React.FC = () => {
           onSuccess={handleSuccess}
           onCancel={handleModalClose}
         />
+      </Modal>
+
+      <Modal
+        title={currentRoom ? `${currentRoom.roomName} - 座位布局` : '座位布局'}
+        open={isLayoutOpen}
+        onCancel={handleLayoutClose}
+        footer={[
+           <Button key="close" onClick={handleLayoutClose}>关闭</Button>
+        ]}
+        width={800}
+        destroyOnHidden
+      >
+        {renderSeatLayout()}
       </Modal>
     </div>
   );

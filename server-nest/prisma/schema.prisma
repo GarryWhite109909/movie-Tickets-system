@@ -55,6 +55,8 @@ model booking {
   seatId     Int?
   filmId     BigInt?
   roomId     Int?
+  row        Int?
+  col        Int?
   ticketCode String?   @db.VarChar(255)
   status     String?   @db.VarChar(255)
   createdAt  DateTime? @db.DateTime(0)

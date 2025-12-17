@@ -16,7 +16,7 @@ function fileFilter(_req: any, file: any, cb: (err: any, accept: boolean) => voi
   const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
   cb(null, allowed.includes(file.mimetype))
 }
-const root = path.join(__dirname, '../../server/public')
+const root = path.join(__dirname, '../../public')
 
 @Controller()
 export class UploadController {

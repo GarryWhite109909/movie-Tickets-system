@@ -27,13 +27,13 @@ export class FilmService {
     
     return films.map(film => ({
       ...film,
-      filmId: film.filmId ? film.filmId.toString() : null,
+      // filmId will be automatically serialized to string via global BigInt.toJSON
       poster: film.poster || '/default-poster.jpg' // Fallback
     }));
   }
 
   async getFilmById(id: number) {
-    const sql = `SELECT * FROM film WHERE filmId = ? AND deletedAt IS NULL`;
+    const sql = `SELECT * FROM film WHERE filmId = ?`;
     const rows = await this.db.query(sql, [id]);
     if (rows.length === 0) return null;
     
@@ -44,7 +44,7 @@ export class FilmService {
     
     return {
       ...film,
-      filmId: film.filmId.toString(),
+      // filmId handled by global serializer
       poster: posterRows.length > 0 ? posterRows[0].url : null
     };
   }
@@ -117,6 +117,6 @@ export class FilmService {
       where: { filmId: BigInt(id) },
       data: { deletedAt: new Date() }
     });
-    return { ...film, filmId: film.filmId.toString() };
+    return film;
   }
 }

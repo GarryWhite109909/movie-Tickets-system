@@ -29,7 +29,7 @@ export class StatsService {
   async topFilms(opts: { from?: string; to?: string; limit?: number }) {
     const params: any[] = []
     let sql =
-      "SELECT film.filmId, film.filmName, COUNT(booking.id) AS tickets, IFNULL(SUM(arrange.price),0) AS revenue FROM booking JOIN arrange ON booking.arrangeId=arrange.arrangeId JOIN film ON film.filmId=booking.filmId WHERE booking.deletedAt IS NULL AND arrange.deletedAt IS NULL AND film.deletedAt IS NULL"
+      "SELECT film.filmId, film.filmName, (SELECT url FROM posterimg WHERE filmId = film.filmId LIMIT 1) as poster, COUNT(booking.id) AS tickets, IFNULL(SUM(arrange.price),0) AS revenue FROM booking JOIN arrange ON booking.arrangeId=arrange.arrangeId JOIN film ON film.filmId=booking.filmId WHERE booking.deletedAt IS NULL AND arrange.deletedAt IS NULL AND film.deletedAt IS NULL"
     if (opts.from && opts.to) {
       sql += " AND booking.createdAt BETWEEN ? AND ?"
       params.push(new Date(opts.from), new Date(opts.to))
@@ -40,6 +40,7 @@ export class StatsService {
     const data = rows.map(r => ({
       filmId: Number(r.filmId || 0),
       filmName: r.filmName,
+      poster: r.poster || '',
       tickets: Number(r.tickets || 0),
       revenue: r.revenue
     }))

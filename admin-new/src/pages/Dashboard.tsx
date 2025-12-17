@@ -16,7 +16,7 @@ const Dashboard: React.FC = () => {
   const { data: topFilms, isLoading: isTopFilmsLoading } = useQuery({
     queryKey: ['topFilms'],
     queryFn: async () => {
-      const res: any = await request.get('/stats/topFilms?from=2018-01-01&to=2025-12-31&limit=5');
+      const res: any = await request.get('/stats/topFilms?from=2018-01-01&to=2025-12-31&limit=10');
       return res.data;
     },
   });

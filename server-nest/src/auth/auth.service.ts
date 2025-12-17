@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from '../utils/db.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly db: DbService) {}
+  constructor(
+    private readonly db: DbService,
+    private readonly jwtService: JwtService
+  ) {}
 
   async webLogin(body: any) {
     const { userName, password } = body;
@@ -12,8 +16,6 @@ export class AuthService {
     }
 
     // Check user table for matching username/phone and password
-    // Using raw query as DbService.query exposes that, but could use Prisma client directly if DbService exposed it.
-    // DbService.query returns T[]
     const users = await this.db.query<{ userId: number, userName: string, phone: string, avatar: string, role: string }>(
       `SELECT userId, userName, phone, avatar FROM user WHERE (userName = ? OR phone = ?) AND password = ? AND deletedAt IS NULL`,
       [userName, userName, password]
@@ -36,13 +38,16 @@ export class AuthService {
 
       const permissions = role?.sys_role_permission.map(rp => rp.sys_permission.code) || [];
 
-      const token = 'web-token-' + Math.random().toString(36).slice(2);
+      // Generate JWT
+      const payload = { userId: user.userId, username: user.userName, role: 'user' };
+      const token = await this.jwtService.signAsync(payload);
+
       return {
         code: 1,
         msg: '登录成功',
         data: {
           ...user,
-          token,
+          token, // Now returning a real JWT
           role: role?.code || 'user',
           permissions,
         },
@@ -52,7 +57,6 @@ export class AuthService {
     }
   }
 
-  // Admin login using DB
   async adminLogin(body: any) {
     const { userName, password } = body;
     if (!userName || !password) {
@@ -111,5 +115,4 @@ export class AuthService {
       return { code: 0, msg: '账号或密码错误' };
     }
   }
-
 }
