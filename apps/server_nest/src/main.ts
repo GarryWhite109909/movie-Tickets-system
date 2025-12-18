@@ -17,6 +17,9 @@ async function bootstrap() {
     credentials: true,
   });
   
+  // Serve static files with specific prefix if needed, though ServeStaticModule in AppModule handles root
+  // The frontend might expect /api/uploads or just /uploads depending on proxy
+  
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') || 3003;
   await app.listen(port);

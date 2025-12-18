@@ -1,5 +1,54 @@
 import { Injectable } from '@nestjs/common';
 import { DbService } from '../utils/db.service';
+import * as fs from 'fs';
+import * as path from 'path';
+
+let cachedUploads: string[] | null = null;
+
+function getUploads(): string[] {
+  if (cachedUploads) return cachedUploads;
+  const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+  try {
+    const files = fs.readdirSync(uploadsDir);
+    cachedUploads = files
+      .filter((f) => /\.(jpe?g|png|webp|gif)$/i.test(f))
+      .sort();
+    return cachedUploads;
+  } catch {
+    cachedUploads = [];
+    return cachedUploads;
+  }
+}
+
+function fileExistsForPublicPath(p: string): boolean {
+  if (!p.startsWith('/')) return false;
+  const fsPath = path.join(process.cwd(), 'public', p.slice(1));
+  try {
+    return fs.existsSync(fsPath);
+  } catch {
+    return false;
+  }
+}
+
+function pickFallbackPoster(seed: string): string | null {
+  const uploads = getUploads();
+  if (uploads.length === 0) return null;
+  let acc = 0;
+  for (let i = 0; i < seed.length; i++) acc = (acc * 31 + seed.charCodeAt(i)) >>> 0;
+  const idx = acc % uploads.length;
+  return `/uploads/${uploads[idx]}`;
+}
+
+function normalizePoster(poster: unknown, seed: string): string | null {
+  if (typeof poster === 'string') {
+    const trimmed = poster.trim();
+    if (trimmed.length > 0) {
+      if (!trimmed.startsWith('/')) return trimmed;
+      if (fileExistsForPublicPath(trimmed)) return trimmed;
+    }
+  }
+  return pickFallbackPoster(seed);
+}
 
 @Injectable()
 export class FilmService {
@@ -38,7 +87,7 @@ export class FilmService {
     return films.map(film => ({
       ...film,
       // filmId will be automatically serialized to string via global BigInt.toJSON
-      poster: film.poster || '/default-poster.jpg',
+      poster: normalizePoster(film.poster, String(film.filmId)) || '',
       genres: typeof film.genres === 'string' && film.genres.length > 0 ? film.genres.split(',') : [],
       areas: typeof film.areas === 'string' && film.areas.length > 0 ? film.areas.split(',') : [],
     }));
@@ -72,7 +121,7 @@ export class FilmService {
     return {
       ...film,
       // filmId handled by global serializer
-      poster: film.poster || null,
+      poster: normalizePoster(film.poster, String(film.filmId ?? id)),
       genres: typeof film.genres === 'string' && film.genres.length > 0 ? film.genres.split(',') : [],
       areas: typeof film.areas === 'string' && film.areas.length > 0 ? film.areas.split(',') : [],
     };
