@@ -1,35 +1,84 @@
-# movieTickets
-一个使用node、MySql、react、reactNative、antDesign完成的一套大型订票系统，其中服务端、数据库，网页订票端、手机订票端和网页管理台
-## 项目说明
-  这个项目主要是自己空闲的时候写的，大部分的代码都是自己边学边用，所以很多地方有很多粗糙的地方。
-  不过从效果来说，基本上完成了一整套的电影订票系统，基本订票付款的操作都能够实现，为了系统管理的方便，
-  我加入了管理系统，主要都是一些用户、电影的管理模块。
-## 主要模块
-  * MySQL数据库
-  * node服务端
-  * 网页订票端
-  * 手机订票端
-  * 管理系统
-## MySQL数据库讲解
-  整个订票系统有18张表，主要有用户表、电影表、订单表、影厅表等。关于影厅考虑到电影院每个影厅布局都不同，所以要做成可配置的，所以我对影厅表做了特殊设置，
-  另外建立了一张座位表，把每一影厅的每一个座位信息都存储下来，具体的内容就不再详解。
-## node服务端
-  在使用node作为服务器的时候，我研究了express和koa两个web服务端框架，最后选择了koa。其中有两个原因，一：我写项目是为了学习技术，koa相比express更新一点
-  ，从研究的角度讲，我更想研究koa。其二，koa是对express的升级，虽然没有express发展成熟，但越来越多的人在用koa，我觉得koa的前景更好一点。
-## 网页订票端
-  仿照猫眼电影，把其中电影订票的功能抽出来，自己进行改造，做出了一个网页订票系统，其中比较难的地方，是电影选座插件的实现，现在市面上没有已经做好的基于
-  React的电影选座插件，所以我自己实现了一个，后面我会把这个插件抽出来，贡献到开源社区里面去。实现效果截图如下：
-  ![网页首页](./screenShots/1.png)
-  ![网页选座](./screenShots/2.png)
-## 手机订票端
-  手机端采用了ReactNative框架，但是因为我没有mac电脑,虚拟机的运行速度太慢，我只实现了android端的手机订票端，主要就是一个导航器和ListView的使用。
-  在手机端和网页端我都接入了在先付款的接口。实现效果截图如下：
-  ![手机端1](./screenShots/4.jpg)
-  ![手机端2](./screenShots/5.jpg)
-  ![手机端3](./screenShots/6.jpg)
-  ![手机端4](./screenShots/7.jpg)
-  ![手机端5](./screenShots/8.jpg)
-## 管理系统
-  管理系统使用AntDsign的界面库，这个就没什么好说的了，主要就是一个影厅的自定义布局配置，其实现效果如下：
-  ![管理系统](./screenShots/3.png)
+# movie_tickets_system
 
+![node](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js&logoColor=white)
+![nestjs](https://img.shields.io/badge/nestjs-backend-e0234e?logo=nestjs&logoColor=white)
+![nextjs](https://img.shields.io/badge/next.js-web-000000?logo=next.js&logoColor=white)
+![react](https://img.shields.io/badge/react-admin-61dafb?logo=react&logoColor=000)
+
+电影票务系统示例工程，包含：后端 API、Web 订票端、后台管理端，以及数据库种子数据。
+
+## 目录结构
+
+- `apps/server_nest`：NestJS + Prisma 后端（默认端口 `3003`，全局前缀 `/api`）
+- `apps/web_new`：Next.js (App Router) Web 订票端
+- `apps/admin_new`：Vite + React 管理端
+- `database/seeds`：MySQL 种子 SQL
+- `docs/screenshots`：项目截图
+
+## 核心功能
+
+- 电影列表/详情、购票流程（含选座 UI）
+- 用户登录、个人信息/头像
+- 后台管理：影厅、电影、角色/权限等模块
+- 后端静态资源：`/uploads`、`/avatar`（由后端 `public/` 目录提供）
+
+## 环境要求
+
+- Node.js（建议 `>= 18`）
+- MySQL（建议 `5.7+`）
+- npm（仓库内各子项目使用 `package-lock.json`）
+
+## 快速开始
+
+### 1) 初始化数据库
+
+- 创建数据库 `filmsdata`
+- 执行种子数据：`database/seeds/filmsdata.sql`
+
+### 2) 启动后端（NestJS）
+
+```bash
+cd apps/server_nest
+npm install
+npm run dev
+```
+
+- 默认监听：`http://localhost:3003`
+- API 前缀：`http://localhost:3003/api`
+
+### 3) 启动 Web 订票端（Next.js）
+
+```bash
+cd apps/web_new
+npm install
+npm run dev
+```
+
+默认：`http://localhost:3000`
+
+### 4) 启动后台管理端（Vite）
+
+```bash
+cd apps/admin_new
+npm install
+npm run dev
+```
+
+默认：`http://localhost:5173`
+
+## 截图
+
+- ![网页首页](./docs/screenshots/1.png)
+- ![网页选座](./docs/screenshots/2.png)
+- ![管理系统](./docs/screenshots/3.png)
+- ![手机端1](./docs/screenshots/4.jpg)
+- ![手机端2](./docs/screenshots/5.jpg)
+- ![手机端3](./docs/screenshots/6.jpg)
+- ![手机端4](./docs/screenshots/7.jpg)
+- ![手机端5](./docs/screenshots/8.jpg)
+
+## 贡献与规范
+
+- 使用小写字母 + 下划线的目录命名（例如 `apps/web_new`）
+- 避免提交构建产物（例如 `.next/`、`dist/`）以及敏感配置（例如 `.env`）
+- 提交信息建议遵循 Conventional Commits（例如 `feat: ...`、`fix: ...`、`chore: ...`）

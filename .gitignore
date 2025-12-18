@@ -1,2 +1,56 @@
-node_modules/
-/.idea/
+# Dependencies
+**/node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Build output
+**/.next/
+**/dist/
+**/build/
+**/out/
+**/.turbo/
+**/.cache/
+**/.parcel-cache/
+**/.vite/
+coverage/
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# VS Code (keep repo settings)
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Trae IDE
+.trae/
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini

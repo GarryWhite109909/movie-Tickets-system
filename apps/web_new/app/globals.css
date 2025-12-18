@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+@theme {
+  /* Ink Wash Theme Colors */
+  --color-ink-black: #000000;
+  --color-ink-dark: #333333;
+  --color-ink-medium: #666666;
+  --color-ink-light: #999999;
+  --color-ink-faint: #F5F5F5;
+  
+  --color-cinnabar: #E74C3C;
+  --color-stone-blue: #3498DB;
+  --color-gold-leaf: #F1C40F;
+  
+  --color-paper: #FDFBF7; /* Slightly warm rice paper color */
+  
+  /* Fonts */
+  --font-title: "Noto Serif SC", "SimSun", serif;
+  --font-body: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --font-calligraphy: "Ma Shan Zheng", "KaiTi", "STKaiti", serif;
+
+  /* Animations */
+  --animate-ink-spread: inkSpread 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  --animate-fade-in: fadeIn 0.8s ease-out forwards;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-ripple: ripple 0.6s linear forwards;
+}
+
+:root {
+  --background: var(--color-paper);
+  --foreground: var(--color-ink-black);
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink-black);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  /* Rice paper texture overlay */
+  background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 700;
+  color: var(--color-ink-black);
+}
+
+/* Utilities */
+.text-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  letter-spacing: 0.2em;
+}
+
+.ink-shadow {
+  filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.2));
+}
+
+.ink-border {
+  border: 2px solid var(--color-ink-black);
+  border-radius: 2px;
+  /* Rough edge effect could be added here with clip-path or border-image */
+}
+
+.cinnabar-seal {
+  background-color: var(--color-cinnabar);
+  color: white;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.3);
+}
+
+/* Animations */
+@keyframes inkSpread {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(10); opacity: 0.1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes draw {
+  0% { stroke-dashoffset: 251; opacity: 0; }
+  10% { opacity: 1; }
+  90% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes shine {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-paper); 
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-light); 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-medium); 
+}
